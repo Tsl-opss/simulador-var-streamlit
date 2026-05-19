@@ -1,0 +1,8 @@
+Mesa,Ativo,Tipo,Quantidade,Preco,Strike,Volatilidade,Tempo_Ate_Vencimento,Taxa_Livre_Risco,Limite_VaR
+Acoes Brasil,PETR4,acao,10000,38.50,0,0.30,0,0.13,600000
+Acoes Brasil,VALE3,acao,8000,62.10,0,0.28,0,0.13,600000
+Opcoes,PETR4_CALL,call,5000,2.30,40,0.35,0.5,0.13,300000
+Opcoes,VALE3_PUT,put,3000,3.10,60,0.32,0.4,0.13,300000
+Long & Short,ITUB4,acao,7000,31.00,0,0.22,0,0.13,400000
+Volatilidade,BBDC4_CALL,call,4000,1.90,15,0.40,0.3,0.13,500000
+Mesa Proprietaria,ABEV3,acao,15000,13.80,0,0.18,0,0.13,450000
