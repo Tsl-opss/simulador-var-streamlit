@@ -106,17 +106,17 @@ def classify_limit(utilization):
 st.sidebar.title("Parâmetros")
 
 confidence_level = st.sidebar.slider(
-    
-    horizon = st.sidebar.number_input(
-    "Horizonte (dias)",
-    1,
-    30,
-    1
-)
     "Nível de Confiança",
     0.90,
     0.99,
     0.95
+)
+
+horizon = st.sidebar.number_input(
+    "Horizonte (dias)",
+    min_value=1,
+    max_value=30,
+    value=1
 )
 
 methodology = st.sidebar.selectbox(
@@ -130,12 +130,11 @@ methodology = st.sidebar.selectbox(
 
 simulations = st.sidebar.number_input(
     "Simulações Monte Carlo",
-    1000,
-    100000,
-    10000,
+    min_value=1000,
+    max_value=100000,
+    value=10000,
     step=1000
 )
-
 # ==========================================================
 # TÍTULO
 # ==========================================================
