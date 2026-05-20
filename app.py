@@ -106,6 +106,13 @@ def classify_limit(utilization):
 st.sidebar.title("Parâmetros")
 
 confidence_level = st.sidebar.slider(
+    
+    horizon = st.sidebar.number_input(
+    "Horizonte (dias)",
+    1,
+    30,
+    1
+)
     "Nível de Confiança",
     0.90,
     0.99,
@@ -230,12 +237,35 @@ for asset in df["Ativo"]:
 # YAHOO FINANCE
 # ==========================================================
 
-prices = yf.download(
-    tickers,
-    period="1y"
-)["Adj Close"]
+try:
 
-returns = prices.pct_change().dropna()
+    data = yf.download(
+        tickers,
+        period="1y",
+        auto_adjust=True
+    )
+
+    if isinstance(data.columns, pd.MultiIndex):
+
+        if "Close" in data.columns.get_level_values(0):
+
+            prices = data["Close"]
+
+        else:
+
+            prices = data
+
+    else:
+
+        prices = data
+
+    returns = prices.pct_change().dropna()
+
+except Exception as e:
+
+    st.error(f"Erro ao baixar dados: {e}")
+
+    st.stop()
 
 # ==========================================================
 # RETORNOS
@@ -289,38 +319,57 @@ for mesa in df["Mesa"].unique():
         weights.values
     )
 
+    weighted_returns = (
+        weighted_returns * np.sqrt(horizon)
+    )
+
     std = np.std(weighted_returns)
 
     mu = weighted_returns.mean()
 
-    # HISTÓRICO
     if methodology == "Histórico":
 
-        var_percent = historical_var(
+        var_percent = abs(np.percentile(
             weighted_returns,
-            confidence_level
+            (1 - confidence_level) * 100
+        ))
+
+        var_value = (
+            var_percent
+            * portfolio_value
         )
 
-        var_value = var_percent * portfolio_value
-
-    # PARAMÉTRICO
     elif methodology == "Paramétrico":
 
-        var_value = parametric_var(
-            std,
-            portfolio_value,
-            confidence_level
+        z = norm.ppf(confidence_level)
+
+        var_value = (
+            z
+            * std
+            * portfolio_value
         )
 
-    # MONTE CARLO
     else:
 
-        var_value, losses = monte_carlo_var(
-            portfolio_value,
+        simulated_returns = np.random.normal(
             mu,
             std,
-            confidence_level,
             simulations
+        )
+
+        simulated_values = (
+            portfolio_value
+            * (1 + simulated_returns)
+        )
+
+        losses = (
+            portfolio_value
+            - simulated_values
+        )
+
+        var_value = np.percentile(
+            losses,
+            confidence_level * 100
         )
 
     limit_var = mesa_df["Limite_VaR"].iloc[0]
@@ -331,10 +380,10 @@ for mesa in df["Mesa"].unique():
 
     results.append({
         "Mesa": mesa,
-        "Valor Carteira": portfolio_value,
-        "VaR": var_value,
-        "Limite": limit_var,
-        "Utilização %": utilization * 100,
+        "Valor Carteira": round(portfolio_value, 2),
+        "VaR": round(var_value, 2),
+        "Limite": round(limit_var, 2),
+        "Utilização %": round(utilization * 100, 2),
         "Status": status
     })
 
