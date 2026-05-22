@@ -405,7 +405,12 @@ fig_var = px.bar(
     x="Mesa",
     y="VaR",
     color="Status",
-    title="VaR por Mesa"
+    title="VaR por Mesa",
+    color_discrete_map={
+        "Verde": "green",
+        "Amarelo": "yellow",
+        "Vermelho": "red"
+    }
 )
 
 st.plotly_chart(
